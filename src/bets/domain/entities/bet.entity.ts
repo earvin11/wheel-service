@@ -5,8 +5,7 @@ export interface BetEntity {
   currency: string;
   gameUuid: string;
   operatorUuid: string;
-  type: string;
-  value: string | number;
+  value: number;
   amount: number;
   betReference: string; // Mismas apuestas del jugador en la ronda referenciadas con un uuid para enviarlo a wallet
   isWinner?: boolean;

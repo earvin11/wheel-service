@@ -4,10 +4,8 @@ import { Bet } from '../domain/implementations/bet.value';
 import { BetRepository } from '../domain/repositories/bet.repository';
 import {
   BetInputInterface,
-  NumberBet,
   Bet as BetBody,
 } from 'src/shared/interfaces/bet-input.interface';
-import { BetsTypesEnum } from 'src/shared/enums/bets.enum';
 import { TransactionUseCases } from 'src/transactions/application/transaction.use-cases';
 import { LoggerPort } from 'src/logging/domain/logger.port';
 import { EventPublisher } from 'src/events/domain/event-publisher';
@@ -52,68 +50,26 @@ export class CreateBetsUseCase {
 
   public processBet = async (data: BetInputInterface) => {
     try {
-      const {
-        calleNumbers = [],
-        chanceSimple = [],
-        color = [],
-        columns = [],
-        cuadroNumbers = [],
-        cubre = [],
-        dozens = [],
-        even_odd = [],
-        lineaNumbers = [],
-        plenoNumbers = [],
-        semiPlenoNumbers = [],
-        specialCalle = [],
-      } = data.bet;
-
       const betReference = generateUuid();
       const bets: BetEntity[] = [];
 
-      // Mapeo de propiedades y tipos
-      const betMappings = [
-        { items: calleNumbers, type: 'calle', key: 'number' },
-        { items: chanceSimple, type: 'chanceSimple', key: 'type' },
-        { items: color, type: 'color', key: 'type' },
-        { items: columns, type: 'column', key: 'type' },
-        { items: cuadroNumbers, type: 'cuadro', key: 'number' },
-        { items: cubre, type: 'cubre', key: 'type' },
-        { items: dozens, type: 'dozens', key: 'type' },
-        { items: even_odd, type: 'evenOdd', key: 'type' },
-        { items: lineaNumbers, type: 'linea', key: 'number' },
-        { items: plenoNumbers, type: 'pleno', key: 'number' },
-        { items: semiPlenoNumbers, type: 'semiPleno', key: 'number' },
-        { items: specialCalle, type: 'specialCalle', key: 'type' },
-      ];
+      for (const optionBet of data.bet) {
+        const { amount, number } = optionBet;
 
-      // Generación dinámica de apuestas
-      for (const { items, type, key } of betMappings) {
-        if (!Array.isArray(items) || !items.length) continue;
-
-        for (const betItem of items) {
-          const { amount } = betItem;
-          const value = betItem[key];
-          bets.push({
-            amount,
-            value:
-              type === 'dozens'
-                ? `${value}-DOZEN`
-                : type === 'column'
-                  ? `${value}-COLUMN`
-                  : value,
-            gameUuid: data.roulette,
-            playerUuid: data.player,
-            roundUuid: data.round,
-            operatorUuid: data.operatorId,
-            currency: data.currency,
-            playerWalletId: data.user_id,
-            type,
-            betReference,
-          });
-        }
+        bets.push({
+          amount,
+          betReference,
+          currency: data.currency,
+          gameUuid: data.gameId,
+          operatorUuid: data.operatorId,
+          playerUuid: data.player,
+          playerWalletId: data.user_id,
+          roundUuid: data.round,
+          value: number,
+        })
       }
 
-      const totalAmount = this.calculateTotalAmount(data.bet);
+      const totalAmount = this.calculateAmountBet(data.bet);
 
       // Registra las apuestas en DB
       await this.createMany(bets);
@@ -124,7 +80,7 @@ export class CreateBetsUseCase {
         bet_date: new Date(),
         bet_id: betReference,
         currency: data.currency,
-        game_id: data.roulette,
+        game_id: data.gameId,
         round_id: data.round,
         transactionType: 'bet',
         platform: 'platform',
@@ -169,63 +125,11 @@ export class CreateBetsUseCase {
     }
   };
 
-  private calculateTotalAmount(bet: BetBody): number {
-    let totalAmountInBet: number = 0;
-
-    Object.keys(bet).forEach((keyBet) => {
-      switch (keyBet) {
-        case BetsTypesEnum.SEMI_PLENO: {
-          const amount = this.calculateAmountNumbers(
-            bet[BetsTypesEnum.SEMI_PLENO],
-            2,
-          );
-          totalAmountInBet += amount;
-          break;
-        }
-        case BetsTypesEnum.CALLE: {
-          const amount = this.calculateAmountNumbers(
-            bet[BetsTypesEnum.CALLE],
-            3,
-          );
-          totalAmountInBet += amount;
-          break;
-        }
-        case BetsTypesEnum.CUADRO: {
-          const amount = this.calculateAmountNumbers(
-            bet[BetsTypesEnum.CUADRO],
-            4,
-          );
-          totalAmountInBet += amount;
-          break;
-        }
-        case BetsTypesEnum.LINEA: {
-          const amount = this.calculateAmountNumbers(
-            bet[BetsTypesEnum.LINEA],
-            6,
-          );
-          totalAmountInBet += amount;
-          break;
-        }
-
-        default: {
-          const currentBetArr = bet[keyBet];
-          currentBetArr.forEach(({ amount }) => {
-            totalAmountInBet += amount;
-          });
-        }
-      }
+  private calculateAmountBet = (bet: BetBody[]): number => {
+    let totalAmount: number = 0;
+    bet.forEach((betBody) => {
+      totalAmount += betBody.amount;
     });
-    return parseFloat(totalAmountInBet.toFixed(2));
-  }
-  private calculateAmountNumbers = (
-    numbers: NumberBet[],
-    iteratorNumber: number,
-  ) => {
-    let amount = 0;
-    for (let i = 0; i <= numbers.length - iteratorNumber; i += iteratorNumber) {
-      const currentBet = numbers[i];
-      amount += currentBet.amount;
-    }
-    return amount;
+    return totalAmount;
   };
 }
