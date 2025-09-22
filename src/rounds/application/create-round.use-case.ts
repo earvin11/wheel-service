@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { RouletteUseCases } from 'src/roulette/application/roulette.use-cases';
 import { generateUuid } from 'src/shared/helpers/generate-uuid.helper';
 import { RoundUseCases } from './round.use-cases';
 import { EventPublisher } from 'src/events/domain/event-publisher';
 import { EventsEnum } from 'src/shared/enums/events.enum';
 import { sleep } from 'src/shared/helpers/sleep.helper';
 import { LoggerPort } from 'src/logging/domain/logger.port';
+import { WheelUseCases } from 'src/wheel/application/wheel.use-cases';
 
 interface ICreateRound {
   ID_Ruleta: string;
@@ -20,7 +20,7 @@ interface ICreateRound {
 @Injectable()
 export class CreateRoundUseCase {
   constructor(
-    private readonly rouletteUseCases: RouletteUseCases,
+    private readonly wheelUseCases: WheelUseCases,
     private readonly roundUseCases: RoundUseCases,
     private readonly eventPublisher: EventPublisher,
     private readonly loggerPort: LoggerPort,
@@ -29,10 +29,10 @@ export class CreateRoundUseCase {
     try {
       const { ID_Ruleta, ID_Ronda } = data;
 
-      const roulette = await this.rouletteUseCases.findOneBy({
+      const roulette = await this.wheelUseCases.findOneBy({
         providerId: ID_Ruleta,
       });
-      //TODO: mejorar error de no coincidir con la ruleta
+      //TODO: mejorar error de no coincidir con el juego
       if (!roulette) return;
 
       const result = Number(data.Resultado);
@@ -46,26 +46,26 @@ export class CreateRoundUseCase {
       }
 
       if (!roulette.active) {
-        await this.rouletteUseCases.updateOne(roulette.uuid!, {
+        await this.wheelUseCases.updateOne(roulette.uuid!, {
           active: true,
         });
       }
 
       //TODO:
-      if (roulette.isManualRoulette) {
-        //BUSCAR RONDA ACTUAL
-        const roundExists = await this.roundUseCases.findOneBy({
-          roulette: roulette.uuid,
-          result: { $in: possibleResults },
-          providerId: { $ne: '999' }, // para no tomar en cuenta rondas cerradas
-        });
-        if (roundExists)
-          return {
-            error: true,
-            msg: 'Round by roulette opened',
-            ID_Ronda: roundExists.providerId,
-          };
-      }
+      // if (roulette.isManualRoulette) {
+      //   //BUSCAR RONDA ACTUAL
+      //   const roundExists = await this.roundUseCases.findOneBy({
+      //     roulette: roulette.uuid,
+      //     result: { $in: possibleResults },
+      //     providerId: { $ne: '999' }, // para no tomar en cuenta rondas cerradas
+      //   });
+      //   if (roundExists)
+      //     return {
+      //       error: true,
+      //       msg: 'Round by roulette opened',
+      //       ID_Ronda: roundExists.providerId,
+      //     };
+      // }
 
       const round = await this.roundUseCases.create({
         identifierNumber: this.useIndentifierNumber(),

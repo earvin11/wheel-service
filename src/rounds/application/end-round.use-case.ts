@@ -1,9 +1,9 @@
-import { RouletteUseCases } from 'src/roulette/application/roulette.use-cases';
 import { RoundUseCases } from './round.use-cases';
 import { EventPublisher } from 'src/events/domain/event-publisher';
 import { EventsEnum } from 'src/shared/enums/events.enum';
 import { Injectable } from '@nestjs/common';
 import { LoggerPort } from 'src/logging/domain/logger.port';
+import { WheelUseCases } from 'src/wheel/application/wheel.use-cases';
 
 export interface IEndRound {
   ID_Ruleta: string;
@@ -19,7 +19,7 @@ export interface IEndRound {
 export class EndRoundUseCase {
   constructor(
     private readonly roundUseCases: RoundUseCases,
-    private readonly rouletteUseCases: RouletteUseCases,
+    private readonly wheelUseCases: WheelUseCases,
     private readonly eventPublisher: EventPublisher,
     private readonly loggerPort: LoggerPort,
   ) {}
@@ -39,13 +39,13 @@ export class EndRoundUseCase {
         };
       }
 
-      const roulette = await this.rouletteUseCases.findOneBy({
+      const roulette = await this.wheelUseCases.findOneBy({
         providerId: data.ID_Ruleta,
       });
       if (!roulette)
         return {
           error: true,
-          message: 'Error roulette not found',
+          message: 'Error wheel not found',
           providerId: data.ID_Ruleta,
         };
 

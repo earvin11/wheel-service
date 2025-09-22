@@ -97,7 +97,7 @@ export class SendEventsRoundAdapter {
       round: {
         current_users: this.current_users,
         round: this.round,
-        ...(this.result != null && { result: this.result })
+        ...(this.result != null && { result: this.result }),
       },
     };
   }

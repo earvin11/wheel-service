@@ -3,22 +3,21 @@ import { OperatorConfigUseCases } from 'src/operators/application/operator-confi
 import { LaunchDto } from '../infraestructure/dto/launch.dto';
 import { CommunicationWalletPort } from 'src/comunication-ms/domain/ports/communication-wallet.port';
 import { CommunicationOperatorPort } from 'src/comunication-ms/domain/ports/communication-operator.port';
-// import { CommunicationCurrencyPort } from 'src/comunication-ms/domain/ports/communiaction-currency.port';
-import { RouletteUseCases } from 'src/roulette/application/roulette.use-cases';
-import { RouletteEntity } from 'src/roulette/domain/entites/roulette.entity';
 import { OperatorConfigEntity } from 'src/operators/domain/entites/operator-config.entity';
 import { OperatorLimitsUseCases } from 'src/operators/application/operator-limits.use-cases';
 import { OperatorLimitsEntity } from 'src/operators/domain/entites/operator-limits.entity';
 import { RoundUseCases } from 'src/rounds/application';
 import { CommunicationChipsPort } from 'src/comunication-ms/domain/ports/communication-chips.port';
 import { LoggerPort } from 'src/logging/domain/logger.port';
+import { WheelUseCases } from 'src/wheel/application/wheel.use-cases';
+import { WheelEntity } from 'src/wheel/domain/entites/wheel.entity';
 
 @Injectable()
 export class LaunchUseCases {
   constructor(
     private readonly operatorConfig: OperatorConfigUseCases,
     private readonly operatorLimitsUseCases: OperatorLimitsUseCases,
-    private readonly rouletteUseCases: RouletteUseCases,
+    private readonly wheelUseCases: WheelUseCases,
     private readonly roundUseCases: RoundUseCases,
     private readonly communicationWallet: CommunicationWalletPort,
     private readonly communicationOperator: CommunicationOperatorPort,
@@ -47,11 +46,9 @@ export class LaunchUseCases {
       // const currency = await this.communicationCurrency.findByISOCode(playerAuth.currency.short);
       // if(!currency) return { ok: false, status: 404, message: 'Currency not found' }
 
-      const roulette = await this.rouletteUseCases.findByUuid(
-        launchData.casinoId,
-      );
+      const roulette = await this.wheelUseCases.findByUuid(launchData.casinoId);
       if (!roulette)
-        return { ok: false, status: 404, message: 'Roulette not found' };
+        return { ok: false, status: 404, message: 'Wheel not found' };
 
       const operatorConfig = await this.operatorConfig.findByOperator(
         launchData.operatorId,
@@ -110,26 +107,26 @@ export class LaunchUseCases {
   }
 
   private buildCasinoData(
-    roulette: RouletteEntity,
+    wheel: WheelEntity,
     operatorConfig: OperatorConfigEntity,
     limits: OperatorLimitsEntity,
   ) {
     return {
       // _id: roulette._id
-      id: roulette.uuid,
-      doubleZero: roulette.doubleZero,
-      name: roulette.name,
-      roundDuration: roulette.roundDuration,
-      providerId: roulette.providerId,
-      urlTransmision: roulette.timeToReleaseJack,
+      id: wheel.uuid,
+      // doubleZero: wheel.doubleZero,
+      name: wheel.name,
+      roundDuration: wheel.roundDuration,
+      providerId: wheel.providerId,
+      // urlTransmision: wheel.timeToReleaseJack,
       layout: operatorConfig.layout,
       template: operatorConfig.template,
-      active: roulette.active,
-      openingTime: roulette.openingTime,
-      closingTime: roulette.closingTime,
-      imgBackground: roulette.imgBackground,
-      manualDisable: roulette.manualDisable,
-      maxPlenosBet: roulette.maxPlenosBet,
+      active: wheel.active,
+      openingTime: wheel.openingTime,
+      closingTime: wheel.closingTime,
+      imgBackground: wheel.imgBackground,
+      manualDisable: wheel.manualDisable,
+      // maxPlenosBet: wheel.maxPlenosBet,
       ...this.buildLimits(limits, operatorConfig),
       // language
       // lastJackpot
@@ -141,57 +138,57 @@ export class LaunchUseCases {
     config: OperatorConfigEntity,
   ) {
     return {
-      pleno: {
-        ...limits.pleno,
-        pay: config.pleno,
-      },
-      semipleno: {
-        ...limits.semipleno,
-        pay: config.semiPleno,
-      },
-      cuadro: {
-        ...limits.cuadro,
-        pay: config.cuadro,
-      },
-      calle: {
-        ...limits.calle,
-        pay: config.calle,
-      },
-      linea: {
-        ...limits.linea,
-        pay: config.linea,
-      },
-      columna: {
-        ...limits.columna,
-        pay: config.column,
-      },
-      docena: {
-        ...limits.docena,
-        pay: config.dozens,
-      },
-      chanceSimple: {
-        ...limits.chanceSimple,
-        pay: config.chanceSimple,
-      },
-      colorBet: {
-        ...limits.color,
-        pay: config.chanceSimple,
-      },
-      even_odd: {
-        ...limits.even_odd,
-        pay: config.chanceSimple,
-      },
-      cubre: {
-        ...limits.cubre,
-        pay: config.cubre,
-      },
-      specialCalle: {
-        ...limits.specialCalle,
-        pay: config.specialCalle,
-      },
-      minBet: limits.minBet,
-      maxBet: limits.maxBet,
-      maxBetPosition: limits.maxBetPosition,
+      // pleno: {
+      //   ...limits.pleno,
+      //   pay: config.pleno,
+      // },
+      // semipleno: {
+      //   ...limits.semipleno,
+      //   pay: config.semiPleno,
+      // },
+      // cuadro: {
+      //   ...limits.cuadro,
+      //   pay: config.cuadro,
+      // },
+      // calle: {
+      //   ...limits.calle,
+      //   pay: config.calle,
+      // },
+      // linea: {
+      //   ...limits.linea,
+      //   pay: config.linea,
+      // },
+      // columna: {
+      //   ...limits.columna,
+      //   pay: config.column,
+      // },
+      // docena: {
+      //   ...limits.docena,
+      //   pay: config.dozens,
+      // },
+      // chanceSimple: {
+      //   ...limits.chanceSimple,
+      //   pay: config.chanceSimple,
+      // },
+      // colorBet: {
+      //   ...limits.color,
+      //   pay: config.chanceSimple,
+      // },
+      // even_odd: {
+      //   ...limits.even_odd,
+      //   pay: config.chanceSimple,
+      // },
+      // cubre: {
+      //   ...limits.cubre,
+      //   pay: config.cubre,
+      // },
+      // specialCalle: {
+      //   ...limits.specialCalle,
+      //   pay: config.specialCalle,
+      // },
+      // minBet: limits.minBet,
+      // maxBet: limits.maxBet,
+      // maxBetPosition: limits.maxBetPosition,
     };
   }
 }

@@ -37,7 +37,7 @@ async function bootstrap() {
   // });
 
   const config = new DocumentBuilder()
-    .setTitle('Roulette Service')
+    .setTitle('Wheel Service')
     .setDescription('')
     .setVersion('1.0')
     // .addServer(`${envs.pathWs}`)

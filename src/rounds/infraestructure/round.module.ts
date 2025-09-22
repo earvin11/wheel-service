@@ -6,7 +6,6 @@ import { RoundMongoRepository } from './repositories/round.mongo-repository';
 import { RoundRepository } from '../domain/repositories/round.repository';
 import { RoundController } from './controllers/round.controller';
 import { DateServiceModule } from 'src/date-service/infraestructure/date-service.module';
-import { RouletteModule } from 'src/roulette/infraestructure/roulette.module';
 import { EventsModule } from 'src/events/infraestructure/events.module';
 import { QueueName } from 'src/shared/enums/queues-names.enum';
 import { RoundQueueService } from './queues/round-queue.service';
@@ -27,6 +26,7 @@ import { RoundCacheRepository } from '../domain/repositories/round-cache.reposit
 import { CacheModule } from '@nestjs/cache-manager';
 import { LoggerModule } from 'src/logging/infraestructure/logger.module';
 import { HotColdNumbersUseCase } from '../application/hot-cold-numbers.use-case';
+import { WheelModule } from 'src/wheel/infraestructure/wheel.module';
 
 @Module({
   imports: [
@@ -61,7 +61,7 @@ import { HotColdNumbersUseCase } from '../application/hot-cold-numbers.use-case'
     ),
     CacheModule.register(),
     LoggerModule,
-    RouletteModule,
+    WheelModule,
     DateServiceModule,
     EventsModule,
   ],

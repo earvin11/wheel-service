@@ -15,7 +15,6 @@ export interface WheelEntity {
   betPays: BetPay[];
   alwaysOpen?: boolean;
   maxBetFigures: number;
-  startRoundTime: number;
   betTime: number;
   jackpot: boolean;
   type?: string;

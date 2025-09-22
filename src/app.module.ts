@@ -4,7 +4,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { envs } from './config/envs';
 // Modules
 import { RoundModule } from './rounds/infraestructure/round.module';
-import { RouletteModule } from './roulette/infraestructure/roulette.module';
 import { DateServiceModule } from './date-service/infraestructure/date-service.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { WsServerModule } from './ws-server/infraestructure/ws-server.module';
@@ -19,6 +18,7 @@ import { LaunchModule } from './launch/infraestructure/launch.module';
 import { SharedCacheModule } from './shared-cache/shared-cache.module';
 import { BetFavoriteModule } from './bets-favorites/infraestucture/bet-favorite.module';
 import { ReportsModule } from './reports/infraestructure/reports.module';
+import { WheelModule } from './wheel/infraestructure/wheel.module';
 
 @Module({
   imports: [
@@ -41,12 +41,12 @@ import { ReportsModule } from './reports/infraestructure/reports.module';
     LaunchModule,
     LoggerModule,
     JackpotModule,
-    RouletteModule,
     OperatorModule,
     ReportsModule,
     RoundModule,
     SharedCacheModule,
     TransactionModule,
+    WheelModule,
     WsServerModule,
   ],
   controllers: [],

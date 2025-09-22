@@ -2,13 +2,15 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsNumber,
+  IsObject,
   IsOptional,
   IsPositive,
   IsString,
   Min,
 } from 'class-validator';
+import { BetPay } from 'src/wheel/domain/entites/wheel.entity';
 
-export class CreateRouletteDto {
+export class CreateWheelDto {
   @ApiProperty()
   @IsString()
   name: string;
@@ -51,17 +53,38 @@ export class CreateRouletteDto {
   imgBackground: string;
 
   @ApiProperty()
-  @IsBoolean()
-  @IsOptional()
-  jackpot?: boolean;
+  @IsNumber()
+  @IsPositive()
+  percentReturnToPlayer: number;
+
+  @ApiProperty()
+  @IsNumber()
+  bank: number;
+
+  @ApiProperty()
+  @IsNumber()
+  startRoundTime: number;
+
+  @ApiProperty()
+  @IsObject()
+  betPays: BetPay[];
 
   @ApiProperty()
   @IsBoolean()
   @IsOptional()
-  doubleZero?: boolean;
+  alwaysOpen?: boolean;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  maxBetFigures: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  betTime: number;
 
   @ApiProperty()
   @IsBoolean()
-  @IsOptional()
-  isManualRoulette?: boolean;
+  jackpot: boolean;
 }
