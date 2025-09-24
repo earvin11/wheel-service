@@ -6,15 +6,10 @@ import { EventsEnum } from 'src/shared/enums/events.enum';
 import { sleep } from 'src/shared/helpers/sleep.helper';
 import { LoggerPort } from 'src/logging/domain/logger.port';
 import { WheelUseCases } from 'src/wheel/application/wheel.use-cases';
+import { RoundEntity } from '../domain/entities/round.entity';
 
 interface ICreateRound {
-  ID_Ruleta: string;
-  ID_Ronda: string;
-  Resultado: string;
-  Giro: string;
-  Rpm: string;
-  Error: string;
-  Fecha: string;
+  providerId: string;
 }
 
 @Injectable()
@@ -27,53 +22,48 @@ export class CreateRoundUseCase {
   ) {}
   async run(data: ICreateRound) {
     try {
-      const { ID_Ruleta, ID_Ronda } = data;
+      const { providerId } = data;
 
-      const roulette = await this.wheelUseCases.findOneBy({
-        providerId: ID_Ruleta,
+      const game = await this.wheelUseCases.findOneBy({
+        providerId,
       });
       //TODO: mejorar error de no coincidir con el juego
-      if (!roulette) return;
+      if (!game) return;
 
-      const result = Number(data.Resultado);
-      const possibleResults = [-1, 99];
+      const lastRound = await this.roundUseCases.findOneBy({ providerId });
 
-      //TODO:
-      // Evaluar data erronea en los results
-      if (!possibleResults.includes(result)) {
-        if (this.verifyResult(result)) {
-        }
+      if (lastRound) {
+        this.loggerPort.error(
+          'Ya existe una ronda en curso para:',
+          JSON.stringify({
+            ...data,
+            id: lastRound.uuid,
+          }),
+        );
+        return {
+          ID_Ronda: lastRound.uuid,
+          BET_TIME: game.betTime,
+        };
       }
 
-      if (!roulette.active) {
-        await this.wheelUseCases.updateOne(roulette.uuid!, {
-          active: true,
-        });
-      }
-
-      //TODO:
-      // if (roulette.isManualRoulette) {
-      //   //BUSCAR RONDA ACTUAL
-      //   const roundExists = await this.roundUseCases.findOneBy({
-      //     roulette: roulette.uuid,
-      //     result: { $in: possibleResults },
-      //     providerId: { $ne: '999' }, // para no tomar en cuenta rondas cerradas
-      //   });
-      //   if (roundExists)
-      //     return {
-      //       error: true,
-      //       msg: 'Round by roulette opened',
-      //       ID_Ronda: roundExists.providerId,
-      //     };
-      // }
+      const { providerId: providerGameId, uuid, betTime } = game;
+      let seccondsToAdd = betTime;
+      const oldRound = await this.roundUseCases.getLatestResults(1);
+      const futureDate = new Date(new Date().getTime() + seccondsToAdd * 1000);
+      const identifierNumber = this.useIndentifierNumber(
+        oldRound[0]!,
+        providerGameId,
+      );
 
       const round = await this.roundUseCases.create({
-        identifierNumber: this.useIndentifierNumber(),
-        providerId: ID_Ronda,
-        rouletteId: roulette.uuid!,
-        rouletteName: roulette.name,
-        secondsToAdd: roulette.roundDuration,
+        identifierNumber,
+        providerId: providerGameId,
+        gameUuid: game.uuid!,
+        start_date: new Date(),
+        end_date: futureDate,
       });
+
+      const chanellSocket = providerGameId;
 
       // Publicar ronda para emitir
       this.eventPublisher.emit(EventsEnum.ROUND_START, {
@@ -81,32 +71,38 @@ export class CreateRoundUseCase {
         round: {
           start_date: round.start_date,
           end_date: round.end_date,
-          ID_Ronda: data.ID_Ronda,
+          ID_Ronda: round.uuid,
           identifierNumber: round.identifierNumber,
           round: round.uuid,
-          gameId: roulette.uuid,
+          gameId: game.uuid,
         },
       });
 
       this.eventPublisher.emit(EventsEnum.ROUND_TO_CLOSED, {
         roundUuid: round.uuid,
-        timeDelay: roulette.roundDuration,
+        timeDelay: game.roundDuration,
       });
-
-      return;
     } catch (error) {
       this.loggerPort.error('Error in CreateRoundUseCase.run', error.stack);
       throw error;
     }
   }
 
-  private useIndentifierNumber = () => {
-    const uuid = generateUuid();
-    const numericUuid = uuid.replace(/-/g, '').replace(/[a-f]/gi, (char) => {
-      return (char.charCodeAt(0) - 87).toString(); // 'a' -> 10, 'b' -> 11, ..., 'f' -> 15
-    });
-    const limitedUuid = numericUuid.slice(0, 10);
-    return parseInt(limitedUuid, 10);
+  private useIndentifierNumber = (lastRound: any, ID_GAME: string) => {
+    const identifierNumber = lastRound?.identifierNumber || `${1}${ID_GAME}`;
+
+    const formatId = this.returnNumberWithoutId(identifierNumber, ID_GAME);
+    const number = `${formatId + 1}${ID_GAME}`;
+    return number;
+  };
+
+  private returnNumberWithoutId = (numero: number | string, id: string) => {
+    const numerToString = numero.toString();
+    const numberWithoutId = numerToString.slice(
+      0,
+      numerToString.length - id.length,
+    );
+    return Number(numberWithoutId);
   };
 
   private verifyResult = (result: number) => {

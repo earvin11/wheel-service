@@ -1,33 +1,26 @@
 import { generateUuid } from 'src/shared/helpers/generate-uuid.helper';
-import { RoundEntity } from '../entities/round.entity';
+import { Jackpot, RoundEntity } from '../entities/round.entity';
 
 export class Round implements RoundEntity {
-  code: string;
-  start_date: Date;
-  end_date: Date;
-  // jackpot_values: JackpotValues[];
-  jackpot_values: any[];
-  result: number;
-  providerId: string;
-  roulette: string;
-  open: boolean;
-  number: number;
-  identifierNumber: number;
-  uuid: string;
+  public result: number | null;
+  public open?: boolean;
+  public start_date: Date;
+  public end_date?: Date;
+  public jackpot_values?: Jackpot[];
+  public gameUuid: string;
+  public providerId: string;
+  public identifierNumber: string;
+  public uuid: string;
 
   constructor(data: RoundEntity) {
-    this.code = data.code;
-    this.start_date = data.start_date;
     this.end_date = data.end_date;
-    // this.jackpot_values = data.jackpot_values;
-    this.jackpot_values = [];
-    this.result = data.result;
-    this.providerId = data.providerId;
-    this.roulette = data.roulette;
-    this.open = true;
-    this.number = data.number;
+    this.gameUuid = data.gameUuid;
     this.identifierNumber = data.identifierNumber;
+    this.jackpot_values = data.jackpot_values;
+    this.open = true;
+    this.providerId = data.providerId;
+    this.result = null;
+    this.start_date = data.start_date;
     this.uuid = generateUuid();
-    // this.crupier = data.crupier;
   }
 }

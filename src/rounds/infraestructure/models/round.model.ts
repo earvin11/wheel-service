@@ -21,7 +21,9 @@ export class RoundModel extends Document implements RoundEntity {
   @Prop()
   number: number;
   @Prop()
-  identifierNumber: number;
+  gameUuid: string;
+  @Prop()
+  identifierNumber: string;
   @Prop({ unique: true, index: true })
   uuid: string;
   @Prop()

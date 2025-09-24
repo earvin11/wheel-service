@@ -38,105 +38,105 @@ export class CreateJackpoUseCase {
   ) {}
 
   public async run(roundUuid: string) {
-    try {
-      const round = await this.roundUseCases.findByUuid(roundUuid);
-      if (!round) {
-        this.loggerPort.error(`Round not found in create jackpot`, roundUuid);
-        return;
-      }
+    // try {
+    //   const round = await this.roundUseCases.findByUuid(roundUuid);
+    //   if (!round) {
+    //     this.loggerPort.error(`Round not found in create jackpot`, roundUuid);
+    //     return;
+    //   }
 
-      const bets = await this.betUseCases.findManyBy({ roundUuid });
+    //   const bets = await this.betUseCases.findManyBy({ roundUuid });
 
-      const jackpot = new Jackpot(this.config);
+    //   const jackpot = new Jackpot(this.config);
 
-      for (let i = 0; i < bets.length; i++) {
-        const currentBet = bets[i];
+    //   for (let i = 0; i < bets.length; i++) {
+    //     const currentBet = bets[i];
 
-        switch (currentBet.type) {
-          case 'pleno':
-            jackpot.betStraight(`${currentBet.value}`, currentBet.amount);
-            break;
-          case 'semiPleno':
-            jackpot.betSplit(+currentBet.value, currentBet.amount);
-            break;
-          case 'calle':
-            jackpot.betStreet(+currentBet.value, currentBet.amount);
-            break;
-          case 'linea':
-            jackpot.betDoubleStreet(+currentBet.value, currentBet.amount);
-            break;
-          case 'cuadro':
-            jackpot.betCorner(+currentBet.value, currentBet.amount);
-            break;
-          case 'chanceSimple':
-            jackpot.betHighLow(
-              currentBet.value === '19-36' ? 'high' : 'low',
-              currentBet.amount,
-            );
-            break;
-          case 'color':
-            jackpot.betColor(
-              currentBet.value === 'BLACK' ? 'black' : 'red',
-              currentBet.amount,
-            );
-            break;
-          case 'dozens':
-            jackpot.betDozen(
-              currentBet.value === 'FIRST-DOZEN'
-                ? 1
-                : currentBet.value === 'SECCOND-DOZEN'
-                  ? 2
-                  : 3,
-              currentBet.amount,
-            );
-            break;
-          case 'evenOdd':
-            jackpot.betEvenOdd(
-              currentBet.value === 'ODD' ? 'odd' : 'even',
-              currentBet.amount,
-            );
-            break;
-          case 'specialCalle':
-            jackpot.betBasket(currentBet.amount);
-            break;
-          case 'column':
-            jackpot.betColumn(
-              currentBet.value === 'FIRST-COLUMN'
-                ? 1
-                : currentBet.value === 'SECCOND-COLUMN'
-                  ? 2
-                  : 3,
-              currentBet.amount,
-            );
-            break;
-          case 'cubre':
-            break;
-          default:
-            break;
-        }
-      }
+    //     switch (currentBet.type) {
+    //       case 'pleno':
+    //         jackpot.betStraight(`${currentBet.value}`, currentBet.amount);
+    //         break;
+    //       case 'semiPleno':
+    //         jackpot.betSplit(+currentBet.value, currentBet.amount);
+    //         break;
+    //       case 'calle':
+    //         jackpot.betStreet(+currentBet.value, currentBet.amount);
+    //         break;
+    //       case 'linea':
+    //         jackpot.betDoubleStreet(+currentBet.value, currentBet.amount);
+    //         break;
+    //       case 'cuadro':
+    //         jackpot.betCorner(+currentBet.value, currentBet.amount);
+    //         break;
+    //       case 'chanceSimple':
+    //         jackpot.betHighLow(
+    //           currentBet.value === '19-36' ? 'high' : 'low',
+    //           currentBet.amount,
+    //         );
+    //         break;
+    //       case 'color':
+    //         jackpot.betColor(
+    //           currentBet.value === 'BLACK' ? 'black' : 'red',
+    //           currentBet.amount,
+    //         );
+    //         break;
+    //       case 'dozens':
+    //         jackpot.betDozen(
+    //           currentBet.value === 'FIRST-DOZEN'
+    //             ? 1
+    //             : currentBet.value === 'SECCOND-DOZEN'
+    //               ? 2
+    //               : 3,
+    //           currentBet.amount,
+    //         );
+    //         break;
+    //       case 'evenOdd':
+    //         jackpot.betEvenOdd(
+    //           currentBet.value === 'ODD' ? 'odd' : 'even',
+    //           currentBet.amount,
+    //         );
+    //         break;
+    //       case 'specialCalle':
+    //         jackpot.betBasket(currentBet.amount);
+    //         break;
+    //       case 'column':
+    //         jackpot.betColumn(
+    //           currentBet.value === 'FIRST-COLUMN'
+    //             ? 1
+    //             : currentBet.value === 'SECCOND-COLUMN'
+    //               ? 2
+    //               : 3,
+    //           currentBet.amount,
+    //         );
+    //         break;
+    //       case 'cubre':
+    //         break;
+    //       default:
+    //         break;
+    //     }
+    //   }
 
-      const resolve = jackpot.resolve(300);
-      const jackpots = resolve.result;
-      await this.roundUseCases.updateByUuid(roundUuid, {
-        jackpot_values: jackpots,
-      });
-      const dataToEmit = {
-        msg: 'Jackpots',
-        round: {
-          jackpot_values: jackpots,
-          round: round.uuid,
-          gameId: round.roulette,
-        },
-      };
-      this.eventPublisher.emit(EventsEnum.EMIT_JACKPOT, dataToEmit);
-      return jackpot;
-    } catch (error) {
-      this.loggerPort.error(
-        `Error metodo CreateJackpoUseCase.run`,
-        error.stack,
-      );
-      throw error;
-    }
+    //   const resolve = jackpot.resolve(300);
+    //   const jackpots = resolve.result;
+    //   await this.roundUseCases.updateByUuid(roundUuid, {
+    //     jackpot_values: jackpots,
+    //   });
+    //   const dataToEmit = {
+    //     msg: 'Jackpots',
+    //     round: {
+    //       jackpot_values: jackpots,
+    //       round: round.uuid,
+    //       gameId: round.roulette,
+    //     },
+    //   };
+    //   this.eventPublisher.emit(EventsEnum.EMIT_JACKPOT, dataToEmit);
+    //   return jackpot;
+    // } catch (error) {
+    //   this.loggerPort.error(
+    //     `Error metodo CreateJackpoUseCase.run`,
+    //     error.stack,
+    //   );
+    //   throw error;
+    // }
   }
 }

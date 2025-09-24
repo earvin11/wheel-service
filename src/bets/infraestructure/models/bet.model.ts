@@ -5,6 +5,9 @@ import { BetEntity } from 'src/bets/domain/entities/bet.entity';
 @Schema()
 export class BetModel extends Document implements BetEntity {
   @Prop()
+  
+  value: number;
+  @Prop()
   roundUuid: string;
 
   @Prop()
@@ -24,9 +27,6 @@ export class BetModel extends Document implements BetEntity {
 
   @Prop()
   type: string;
-
-  @Prop()
-  value: string;
 
   @Prop()
   amount: number;

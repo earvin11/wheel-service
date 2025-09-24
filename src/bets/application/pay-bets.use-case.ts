@@ -45,10 +45,12 @@ export class PayBetsUseCase {
 
       // TODO: cachear response
       const wheel = await this.wheelUseCases.findById(data.gameId);
-      if(!wheel) return;
+      if (!wheel) return;
 
       // Revisar que venga ese pago para ese numero
-      const basePay = wheel.betPays!.find((b) => b.number === result)!.multiplier;
+      const basePay = wheel.betPays!.find(
+        (b) => b.number === result,
+      )!.multiplier;
 
       // Preparar todas las actualizaciones
       const updateBetsWinner = betsWinner.map(async (currentBet: BetEntity) => {
@@ -59,7 +61,6 @@ export class PayBetsUseCase {
         const amountPayout = parseFloat(
           // (+operatorConfig[currentBet.type] * +currentBet.amount).toFixed(2),
           (basePay * +currentBet.amount).toFixed(2),
-          
         );
         return this.betRepository.updateByUuid(currentBet.uuid!, {
           amountPayout,

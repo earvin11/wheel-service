@@ -1,16 +1,16 @@
 export interface RoundEntity {
-  // _id?: string;
-  code: string;
+  result?: number | null;
+  open?: boolean;
   start_date: Date;
-  end_date: Date;
-  jackpot_values?: any[];
-  // jackpot_values: JackpotValues[];
-  result: number;
+  end_date?: Date;
+  jackpot_values?: Jackpot[];
+  gameUuid: string;
   providerId: string;
-  roulette: string;
-  open: boolean;
-  number: number;
-  identifierNumber: number;
+  identifierNumber: string;
   uuid?: string;
-  // crupier: string;
+}
+
+export interface Jackpot {
+  number: number;
+  multiplier: number;
 }

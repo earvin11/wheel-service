@@ -48,11 +48,12 @@ export class LaunchController {
     @Query('limitResults', new DefaultValuePipe(40), ParseIntPipe)
     limitResults: number,
   ) {
-    const [latestResults, numbersHotCold] = await Promise.all([
+    const [latestResults, /*numbersHotCold*/] = await Promise.all([
       this.roundUseCases.getLatestResults(limitResults),
-      this.hotColdNumbersUseCase.run(limitRounds),
+      // this.hotColdNumbersUseCase.run(limitRounds),
     ]);
 
-    return { latestResults, numbersHotCold };
+    // return { latestResults, numbersHotCold };
+    return { latestResults };
   }
 }

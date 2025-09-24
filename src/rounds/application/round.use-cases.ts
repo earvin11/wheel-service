@@ -5,60 +5,35 @@ import { RoundRepository } from '../domain/repositories/round.repository';
 import { Injectable } from '@nestjs/common';
 import { LoggerPort } from 'src/logging/domain/logger.port';
 
-interface ICreateRound {
-  rouletteId: string;
-  rouletteName: string;
-  providerId: string;
-  identifierNumber: number;
-  secondsToAdd: number;
-}
+// interface ICreateRound {
+//   rouletteId: string;
+//   rouletteName: string;
+//   providerId: string;
+//   identifierNumber: string;
+//   secondsToAdd: number;
+// }
 
-interface ResultItem {
-  result: number;
-  jackpot: boolean;
-  jackpotValues: number[];
-  multiplier?: number;
-}
+// interface ResultItem {
+//   result: number;
+//   jackpot: boolean;
+//   jackpotValues: number[];
+//   multiplier?: number;
+// }
 
 @Injectable()
 export class RoundUseCases {
   constructor(
     private readonly roundRepository: RoundRepository,
-    private readonly dateServiceUseCases: DateServiceUseCases,
+    // private readonly dateServiceUseCases: DateServiceUseCases,
     private readonly loggerPort: LoggerPort,
   ) {}
 
-  public create = async (data: ICreateRound) => {
+  public create = async (data: RoundEntity) => {
     try {
-      const {
-        rouletteId,
-        rouletteName,
-        providerId,
-        identifierNumber,
-        secondsToAdd,
-      } = data;
-
-      const date = this.dateServiceUseCases.getCurrentDate('DD-MM-YYYY');
-      const time = this.dateServiceUseCases.getCurrentTime('HH-mm-ss');
-
-      const number = await this.verifyDate(rouletteId);
-
-      const startDate = new Date();
-      const futureDate = new Date(startDate.getTime() + secondsToAdd * 1000);
-      const newRound = new Round({
-        code: `${rouletteName}-${date}-${time}-${number}`,
-        end_date: futureDate,
-        identifierNumber,
-        number,
-        open: true,
-        providerId,
-        roulette: rouletteId,
-        result: -1,
-        start_date: startDate,
-      });
+      const newRound = new Round(data);
       return await this.roundRepository.create(newRound);
     } catch (error) {
-      this.loggerPort.error('Error in RoundUseCases.create', error.stack);
+      this.loggerPort.error('Error in RoundUseCases.create', error);
       throw error;
     }
   };
@@ -68,7 +43,7 @@ export class RoundUseCases {
     try {
       return await this.roundRepository.findAll(skip, limit);
     } catch (error) {
-      this.loggerPort.error('Error in RoundUseCases.findAll', error.stack);
+      this.loggerPort.error('Error in RoundUseCases.findAll', error);
       throw error;
     }
   };
@@ -78,7 +53,7 @@ export class RoundUseCases {
     try {
       return await this.roundRepository.findByUuid(uuid);
     } catch (error) {
-      this.loggerPort.error('Error in RoundUseCases.findByUuid', error.stack);
+      this.loggerPort.error('Error in RoundUseCases.findByUuid', error);
       throw error;
     }
   };
@@ -87,7 +62,7 @@ export class RoundUseCases {
     try {
       return await this.roundRepository.findOneBy(filter);
     } catch (error) {
-      this.loggerPort.error('Error in RoundUseCases.findOneBy', error.stack);
+      this.loggerPort.error('Error in RoundUseCases.findOneBy', error);
       throw error;
     }
   };
@@ -96,7 +71,7 @@ export class RoundUseCases {
     try {
       return await this.roundRepository.updateByUuid(uuid, data);
     } catch (error) {
-      this.loggerPort.error('Error in RoundUseCases.updateByUuid', error.stack);
+      this.loggerPort.error('Error in RoundUseCases.updateByUuid', error);
       throw error;
     }
   };
@@ -119,7 +94,7 @@ export class RoundUseCases {
           jackpot_values.map(({ number, multiplier }) => [number, multiplier]),
         );
 
-        const hit = jackpotMap.get(result);
+        const hit = jackpotMap.get(result?? 99);
         return {
           result,
           jackpot: hit !== undefined,
@@ -159,7 +134,7 @@ export class RoundUseCases {
 
       return 1;
     } catch (error) {
-      this.loggerPort.error('Error in RoundUseCases.verifyDate', error.stack);
+      this.loggerPort.error('Error in RoundUseCases.verifyDate', error);
       throw error;
     }
   };

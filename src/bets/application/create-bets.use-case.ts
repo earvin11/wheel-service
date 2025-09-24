@@ -66,7 +66,7 @@ export class CreateBetsUseCase {
           playerWalletId: data.user_id,
           roundUuid: data.round,
           value: number,
-        })
+        });
       }
 
       const totalAmount = this.calculateAmountBet(data.bet);

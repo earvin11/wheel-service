@@ -10,42 +10,42 @@ export class HotColdNumbersUseCase {
     private readonly roundCacheUseCases: RoundCacheUseCases,
   ) {}
 
-  async run(limit: number) {
-    const limitAdjust = this.adjustRounds(limit);
+  // async run(limit: number) {
+  //   const limitAdjust = this.adjustRounds(limit);
 
-    const resultExists = await this.roundCacheUseCases.findHotCold(
-      String(limitAdjust),
-    );
-    if (resultExists) return JSON.parse(resultExists);
+  //   const resultExists = await this.roundCacheUseCases.findHotCold(
+  //     String(limitAdjust),
+  //   );
+  //   if (resultExists) return JSON.parse(resultExists);
 
-    const rounds = await this.roundRepository.findManyBy(
-      {},
-      { $natural: -1 },
-      limitAdjust,
-    );
+  //   const rounds = await this.roundRepository.findManyBy(
+  //     {},
+  //     { $natural: -1 },
+  //     limitAdjust,
+  //   );
 
-    const frequency = this.calculateFrequency(rounds);
-    const result = this.formatHotCold(frequency);
+  //   const frequency = this.calculateFrequency(rounds);
+  //   const result = this.formatHotCold(frequency);
 
-    await this.roundCacheUseCases.saveHotCold(String(limitAdjust), result);
-    return result;
-  }
+  //   await this.roundCacheUseCases.saveHotCold(String(limitAdjust), result);
+  //   return result;
+  // }
 
-  private calculateFrequency(rounds: RoundEntity[]): Record<number, number> {
-    // Inicializamos todos los números con frecuencia 0
-    const freq: Record<number, number> = {};
-    for (let i = 0; i <= 36; i++) {
-      freq[i] = 0;
-    }
+  // private calculateFrequency(rounds: RoundEntity[]): Record<number, number> {
+  //   // Inicializamos todos los números con frecuencia 0
+  //   const freq: Record<number, number> = {};
+  //   for (let i = 0; i <= 36; i++) {
+  //     freq[i] = 0;
+  //   }
 
-    // Sumamos las apariciones
-    for (const r of rounds) {
-      if (r.result >= 0 && r.result <= 36) {
-        freq[r.result]++;
-      }
-    }
-    return freq;
-  }
+  //   // Sumamos las apariciones
+  //   for (const r of rounds) {
+  //     if (r.result >= 0 && r.result <= 36) {
+  //       freq[r.result]++;
+  //     }
+  //   }
+  //   return freq;
+  // }
 
   private formatHotCold(freq: Record<number, number>) {
     const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
